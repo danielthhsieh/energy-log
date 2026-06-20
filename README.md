@@ -1,2 +1,2 @@
-# energy-log
+# energy-journal
 能量日誌
