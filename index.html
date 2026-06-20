@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>晚間能量記錄</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: #fff;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .date-display {
+            font-size: 28px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .time-display {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-left: 4px solid #667eea;
+        }
+
+        .card.active {
+            background: #f0f4ff;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #667eea;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        /* 卡片 1：心理狀態 */
+        .slider-group {
+            margin-bottom: 20px;
+        }
+
+        .slider-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .slider-label-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .slider-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+            min-width: 24px;
+            text-align: right;
+        }
+
+        .slider-emoji {
+            margin-left: 8px;
+            font-size: 20px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(to right, #ff6b6b, #ffd93d, #6bcf7f);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+
+        /* 卡片 2：今日活動 */
+        .activity-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .activity-btn {
+            padding: 16px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .activity-btn:active {
+            transform: scale(0.95);
+        }
+
+        .activity-btn.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .activity-emoji {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        /* 卡片 3：感恩和反思 */
+        .text-section {
+            margin-bottom: 16px;
+        }
+
+        .text-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .text-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #667eea;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: none;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .char-count {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        /* 提交按鈕 */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* 成功訊息 */
+        .success-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .success-message.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .success-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 24px;
+            text-align: center;
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-icon {
+            font-size: 60px;
+            margin-bottom: 16px;
+        }
+
+        .success-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .success-subtext {
+            font-size: 14px;
+            color: #999;
+        }
+
+        /* 載入狀態 */
+        .loading {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: blink 1s infinite;
+            margin: 0 2px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 20px;
+                padding: 20px;
+            }
+            
+            .date-display {
+                font-size: 24px;
+            }
+        }
+
+        /* 錯誤訊息 */
+        .error-message {
+            background: #ffe0e0;
+            border-left: 4px solid #ff6b6b;
+            color: #d63031;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="date-display" id="dateDisplay">2026年6月20日</div>
+            <div class="time-display">22:50 晚間記錄</div>
+        </div>
+
+        <form id="energyForm">
+            <!-- 卡片 1：心理狀態 -->
+            <div class="card">
+                <div class="card-title">💭 心理狀態</div>
+                
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span class="slider-label-text">壓力分數</span>
+                        <span class="slider-value">
+                            <span id="pressureValue">5</span>
+                            <span class="slider-emoji" id="pressureEmoji">😐</span>
+                        </span>
+                    </div>
+                    <input type="range" id="pressure" name="压力分数" min="1" max="10" value="5">
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span class="slider-label-text">思路清晰度</span>
+                        <span class="slider-value">
+                            <span id="clarityValue">5</span>
+                            <span class="slider-emoji" id="clarityEmoji">🧠</span>
+                        </span>
+                    </div>
+                    <input type="range" id="clarity" name="思路清晰度" min="1" max="10" value="5">
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span class="slider-label-text">睡前電量</span>
+                        <span class="slider-value">
+                            <span id="energyValue">5</span>
+                            <span class="slider-emoji" id="energyEmoji">🔋</span>
+                        </span>
+                    </div>
+                    <input type="range" id="energy" name="睡前电量" min="1" max="10" value="5">
+                </div>
+            </div>
+
+            <!-- 卡片 2：今日活動 -->
+            <div class="card">
+                <div class="card-title">🏃 今日活動</div>
+                <div class="activity-grid">
+                    <button type="button" class="activity-btn" data-activity="散步">
+                        <span class="activity-emoji">🚶</span>
+                        散步
+                    </button>
+                    <button type="button" class="activity-btn" data-activity="冥想">
+                        <span class="activity-emoji">🧘</span>
+                        冥想
+                    </button>
+                    <button type="button" class="activity-btn" data-activity="重训">
+                        <span class="activity-emoji">💪</span>
+                        重訓
+                    </button>
+                    <button type="button" class="activity-btn" data-activity="跑步">
+                        <span class="activity-emoji">🏃</span>
+                        跑步
+                    </button>
+                </div>
+            </div>
+
+            <!-- 卡片 3：感恩與反思 -->
+            <div class="card">
+                <div class="card-title">✨ 感恩與反思</div>
+                
+                <div class="text-section">
+                    <div class="text-label">輕量感恩</div>
+                    <textarea id="gratitude" name="轻量感恩" placeholder="今天感謝什麼？" maxlength="100"></textarea>
+                    <div class="char-count"><span id="gratitudeCount">0</span>/100</div>
+                </div>
+
+                <div class="text-section">
+                    <div class="text-label">反思</div>
+                    <textarea id="reflection" name="反思" placeholder="任何想記錄的觀察或想法..." maxlength="100"></textarea>
+                    <div class="char-count"><span id="reflectionCount">0</span>/100</div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">✨ 提交記錄</button>
+        </form>
+
+        <div class="error-message" id="errorMessage" style="display: none;"></div>
+    </div>
+
+    <!-- 成功訊息 -->
+    <div class="success-message" id="successMessage">
+        <div class="success-content">
+            <div class="success-icon">✓</div>
+            <div class="success-text">已保存</div>
+            <div class="success-subtext">感謝今日的記錄 💝</div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 設定 Google Apps Script Web App URL =====
+        // 替換為你部署後的 Web App URL
+        const SCRIPT_URL = "https://script.google.com/macros/u/1/s/AKfycbxx9qRyKruRg-P7by8C5V6ub8sZUW4Y0R0gNn3r62a59ugJVM_ZRhaRCkqXtD3xAjDd/exec"; 
+        // 部署後會產生一個網址，格式如上，將 YOUR_SCRIPT_ID 替換成實際的 ID
+
+        // ===== 日期初始化 =====
+        function initializeDate() {
+            const today = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            const dateString = today.toLocaleDateString('zh-TW', options);
+            document.getElementById('dateDisplay').textContent = dateString.replace('年', '年').replace('月', '月').replace('日', '日');
+            document.getElementById('date').value = today.toISOString().split('T')[0];
+        }
+
+        // ===== 滑桿的 Emoji 反饋 =====
+        function getEmoji(type, value) {
+            value = parseInt(value);
+            
+            if (type === 'pressure') {
+                if (value <= 2) return '😌';
+                if (value <= 4) return '😐';
+                if (value <= 6) return '😟';
+                if (value <= 8) return '😓';
+                return '😫';
+            } else if (type === 'clarity') {
+                if (value <= 2) return '🤯';
+                if (value <= 4) return '😵';
+                if (value <= 6) return '🧠';
+                if (value <= 8) return '💡';
+                return '✨';
+            } else if (type === 'energy') {
+                if (value <= 2) return '🪫';
+                if (value <= 4) return '🔋';
+                if (value <= 6) return '🔌';
+                if (value <= 8) return '⚡';
+                return '🔥';
+            }
+        }
+
+        // 壓力分數滑桿
+        document.getElementById('pressure').addEventListener('input', function() {
+            document.getElementById('pressureValue').textContent = this.value;
+            document.getElementById('pressureEmoji').textContent = getEmoji('pressure', this.value);
+        });
+
+        // 思路清晰度滑桿
+        document.getElementById('clarity').addEventListener('input', function() {
+            document.getElementById('clarityValue').textContent = this.value;
+            document.getElementById('clarityEmoji').textContent = getEmoji('clarity', this.value);
+        });
+
+        // 睡前電量滑桿
+        document.getElementById('energy').addEventListener('input', function() {
+            document.getElementById('energyValue').textContent = this.value;
+            document.getElementById('energyEmoji').textContent = getEmoji('energy', this.value);
+        });
+
+        // ===== 活動按鈕 =====
+        const activityBtns = document.querySelectorAll('.activity-btn');
+        const activityState = {
+            '散步': false,
+            '冥想': false,
+            '重训': false,
+            '跑步': false
+        };
+
+        activityBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const activity = this.dataset.activity;
+                activityState[activity] = !activityState[activity];
+                this.classList.toggle('active');
+            });
+        });
+
+        // ===== 字數計數 =====
+        document.getElementById('gratitude').addEventListener('input', function() {
+            document.getElementById('gratitudeCount').textContent = this.value.length;
+        });
+
+        document.getElementById('reflection').addEventListener('input', function() {
+            document.getElementById('reflectionCount').textContent = this.value.length;
+        });
+
+        // ===== 新增隱藏的日期輸入欄 =====
+        const form = document.getElementById('energyForm');
+        const dateInput = document.createElement('input');
+        dateInput.type = 'hidden';
+        dateInput.id = 'date';
+        dateInput.name = 'date';
+        form.appendChild(dateInput);
+
+        // ===== 表單提交 =====
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '保存中' + ' '.repeat(3);
+
+            try {
+                // 準備提交資料
+                const formData = {
+                    date: document.getElementById('date').value,
+                    压力分数: parseInt(document.getElementById('pressure').value),
+                    思路清晰度: parseInt(document.getElementById('clarity').value),
+                    睡前电量: parseInt(document.getElementById('energy').value),
+                    散步: activityState['散步'],
+                    冥想: activityState['冥想'],
+                    重训: activityState['重训'],
+                    跑步: activityState['跑步'],
+                    轻量感恩: document.getElementById('gratitude').value,
+                    反思: document.getElementById('reflection').value
+                };
+
+                // 發送到 Google Apps Script
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(formData),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // 顯示成功訊息
+                    document.getElementById('successMessage').classList.add('show');
+                    
+                    // 3 秒後關閉（如果在 Safari 中，用戶需要手動關閉）
+                    setTimeout(() => {
+                        // 嘗試關閉 Safari（iOS 快捷指令打開的頁面）
+                        if (window.location.protocol === 'https:' && navigator.userAgent.includes('Safari')) {
+                            window.history.back();
+                        }
+                    }, 2000);
+                } else {
+                    throw new Error(result.error || '提交失敗');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                const errorMsg = document.getElementById('errorMessage');
+                errorMsg.textContent = '❌ 提交失敗：' + error.message;
+                errorMsg.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = '✨ 提交記錄';
+            }
+        });
+
+        // 初始化
+        initializeDate();
+    </script>
+</body>
+</html>
