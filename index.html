@@ -115,7 +115,20 @@
             font-size: 20px;
         }
 
-        input[type="range"] {
+        /* 壓力分數滑桿：左綠右紅 */
+        #pressure {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(to right, #6bcf7f, #ff6b6b);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        /* 其他滑桿：左紅右綠 */
+        #clarity,
+        #energy {
             width: 100%;
             height: 6px;
             border-radius: 3px;
@@ -316,22 +329,6 @@
             color: #999;
         }
 
-        /* 載入狀態 */
-        .loading {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #667eea;
-            animation: blink 1s infinite;
-            margin: 0 2px;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
-        }
-
         /* 響應式設計 */
         @media (max-width: 480px) {
             .container {
@@ -376,7 +373,7 @@
                             <span class="slider-emoji" id="pressureEmoji">😐</span>
                         </span>
                     </div>
-                    <input type="range" id="pressure" name="压力分数" min="1" max="10" value="5">
+                    <input type="range" id="pressure" name="壓力分數" min="1" max="10" value="5">
                 </div>
 
                 <div class="slider-group">
@@ -398,7 +395,7 @@
                             <span class="slider-emoji" id="energyEmoji">🔋</span>
                         </span>
                     </div>
-                    <input type="range" id="energy" name="睡前电量" min="1" max="10" value="5">
+                    <input type="range" id="energy" name="睡前電量" min="1" max="10" value="5">
                 </div>
             </div>
 
@@ -414,7 +411,7 @@
                         <span class="activity-emoji">🧘</span>
                         冥想
                     </button>
-                    <button type="button" class="activity-btn" data-activity="重训">
+                    <button type="button" class="activity-btn" data-activity="重訓">
                         <span class="activity-emoji">💪</span>
                         重訓
                     </button>
@@ -431,7 +428,7 @@
                 
                 <div class="text-section">
                     <div class="text-label">輕量感恩</div>
-                    <textarea id="gratitude" name="轻量感恩" placeholder="今天感謝什麼？" maxlength="100"></textarea>
+                    <textarea id="gratitude" name="輕量感恩" placeholder="今天感謝什麼？" maxlength="100"></textarea>
                     <div class="char-count"><span id="gratitudeCount">0</span>/100</div>
                 </div>
 
@@ -442,7 +439,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="submit-btn">✨ 提交記錄</button>
+            <button type="submit" class="submit-btn">✨ 完成今晚的紀錄</button>
         </form>
 
         <div class="error-message" id="errorMessage" style="display: none;"></div>
@@ -452,15 +449,15 @@
     <div class="success-message" id="successMessage">
         <div class="success-content">
             <div class="success-icon">✓</div>
-            <div class="success-text">已保存</div>
-            <div class="success-subtext">感謝今日的記錄 💝</div>
+            <div class="success-text">今晚完成</div>
+            <div class="success-subtext">你又完成了美好的一天！ 💝</div>
         </div>
     </div>
 
     <script>
         // ===== 設定 Google Apps Script Web App URL =====
         // 替換為你部署後的 Web App URL
-        const SCRIPT_URL = "https://script.google.com/macros/u/1/s/AKfycbxx9qRyKruRg-P7by8C5V6ub8sZUW4Y0R0gNn3r62a59ugJVM_ZRhaRCkqXtD3xAjDd/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/userweb"; 
         // 部署後會產生一個網址，格式如上，將 YOUR_SCRIPT_ID 替換成實際的 ID
 
         // ===== 日期初始化 =====
@@ -468,7 +465,7 @@
             const today = new Date();
             const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
             const dateString = today.toLocaleDateString('zh-TW', options);
-            document.getElementById('dateDisplay').textContent = dateString.replace('年', '年').replace('月', '月').replace('日', '日');
+            document.getElementById('dateDisplay').textContent = dateString;
             document.getElementById('date').value = today.toISOString().split('T')[0];
         }
 
@@ -520,7 +517,7 @@
         const activityState = {
             '散步': false,
             '冥想': false,
-            '重训': false,
+            '重訓': false,
             '跑步': false
         };
 
@@ -556,20 +553,20 @@
             
             const submitBtn = document.querySelector('.submit-btn');
             submitBtn.disabled = true;
-            submitBtn.textContent = '保存中' + ' '.repeat(3);
+            submitBtn.textContent = '正在記錄...';
 
             try {
                 // 準備提交資料
                 const formData = {
                     date: document.getElementById('date').value,
-                    压力分数: parseInt(document.getElementById('pressure').value),
+                    壓力分數: parseInt(document.getElementById('pressure').value),
                     思路清晰度: parseInt(document.getElementById('clarity').value),
-                    睡前电量: parseInt(document.getElementById('energy').value),
+                    睡前電量: parseInt(document.getElementById('energy').value),
                     散步: activityState['散步'],
                     冥想: activityState['冥想'],
-                    重训: activityState['重训'],
+                    重訓: activityState['重訓'],
                     跑步: activityState['跑步'],
-                    轻量感恩: document.getElementById('gratitude').value,
+                    輕量感恩: document.getElementById('gratitude').value,
                     反思: document.getElementById('reflection').value
                 };
 
@@ -588,9 +585,8 @@
                     // 顯示成功訊息
                     document.getElementById('successMessage').classList.add('show');
                     
-                    // 3 秒後關閉（如果在 Safari 中，用戶需要手動關閉）
+                    // 3 秒後關閉
                     setTimeout(() => {
-                        // 嘗試關閉 Safari（iOS 快捷指令打開的頁面）
                         if (window.location.protocol === 'https:' && navigator.userAgent.includes('Safari')) {
                             window.history.back();
                         }
@@ -602,10 +598,10 @@
             } catch (error) {
                 console.error('Error:', error);
                 const errorMsg = document.getElementById('errorMessage');
-                errorMsg.textContent = '❌ 提交失敗：' + error.message;
+                errorMsg.textContent = '❌ 紀錄失敗：' + error.message;
                 errorMsg.style.display = 'block';
                 submitBtn.disabled = false;
-                submitBtn.textContent = '✨ 提交記錄';
+                submitBtn.textContent = '✨ 完成今晚的紀錄';
             }
         });
 
