@@ -649,7 +649,8 @@
                     loadIndicator.classList.add('done');
                 } else {
                     // 今天還沒有記錄
-                    loadIndicator.textContent = '';
+                    loadIndicator.textContent = '準備好了 ✨';
+                    loadIndicator.classList.add('done');
                 }
             } catch (error) {
                 console.error('載入失敗:', error);
